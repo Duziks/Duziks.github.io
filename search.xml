@@ -4,11 +4,11 @@
   
     
     <entry>
-      <title>Nginx 反向代理 Docker 实现域名与 IP 的访问分流</title>
-      <link href="/2026/03/31/Nginx-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86-Docker-%E5%AE%9E%E7%8E%B0%E5%9F%9F%E5%90%8D%E4%B8%8E-IP-%E7%9A%84%E8%AE%BF%E9%97%AE%E5%88%86%E6%B5%81/"/>
-      <url>/2026/03/31/Nginx-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86-Docker-%E5%AE%9E%E7%8E%B0%E5%9F%9F%E5%90%8D%E4%B8%8E-IP-%E7%9A%84%E8%AE%BF%E9%97%AE%E5%88%86%E6%B5%81/</url>
+      <title>Nginx 博客配置 Let&#39;s Encrypt SSL 证书及 DNS 踩坑记录</title>
+      <link href="/2026/04/01/Nginx-%E5%8D%9A%E5%AE%A2%E9%85%8D%E7%BD%AE-Let-s-Encrypt-SSL-%E8%AF%81%E4%B9%A6%E5%8F%8A-DNS-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/"/>
+      <url>/2026/04/01/Nginx-%E5%8D%9A%E5%AE%A2%E9%85%8D%E7%BD%AE-Let-s-Encrypt-SSL-%E8%AF%81%E4%B9%A6%E5%8F%8A-DNS-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/</url>
       
-        <content type="html"><![CDATA[<h2 id="Nginx-反向代理-Docker-实现域名与-IP-的访问分流">Nginx 反向代理 Docker 实现域名与 IP 的访问分流</h2><h3 id="1-起因与冲突">1. 起因与冲突</h3><p>最近在服务器上部署了两个东西：一个是基于 <strong>Hexo</strong> 的个人博客，另一个是基于 <strong>Docker</strong> 部署的 <strong>HOJ（Hcode Online Judge）</strong>。</p><p>原本的想法很简单：</p><ul><li>输入域名 <code>duziks.top</code> 访问博客。</li><li>输入服务器 IP 访问 OJ 系统。</li></ul><p><strong>遇到的坑：</strong> 两个服务都默认想要占用 <strong>80 端口</strong>。Docker 容器（<code>hoj-frontend</code>）先占了坑，导致 Nginx 启动时直接报错，提示端口被占用。</p><hr><h3 id="2-解决思路：反向代理">2. 解决思路：反向代理</h3><p>核心思路是 <strong>“让出 80 端口，统一交给 Nginx 管理”</strong>。</p><ol><li>把 Docker 容器内部的 80 端口映射到宿主机的 <strong>8081</strong> 端口（避开公网默认的 80）。</li><li>让 Nginx 监听真正的 <strong>80</strong> 端口。</li><li>Nginx 内部做判断：如果是域名访问，直接读静态文件；如果是 IP 访问，就把流量“转发”给内部的 8081 端口。</li></ol><hr><h3 id="3-操作实录">3. 操作实录</h3><h4 id="第一步：修改-Docker-端口映射">第一步：修改 Docker 端口映射</h4><p>找到 HOJ 的安装目录（我的是在 <code>~/hoj-deploy/standAlone</code>），修改 <code>docker-compose.yml</code>。</p><p>将 <code>hoj-frontend</code> 的 <code>ports</code> 部分从 <code>&quot;80:80&quot;</code> 改为 <code>&quot;8081:80&quot;</code>。</p><p>Bash</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 重启容器使配置生效</span><br><span class="line">docker-compose up -d hoj-frontend</span><br></pre></td></tr></table></figure><p>检查一下：执行 <code>docker ps</code> 看到 <code>0.0.0.0:8081-&gt;80/tcp</code> 就算成功了。</p><h4 id="第二步：配置-Nginx-分流">第二步：配置 Nginx 分流</h4><p>在 <code>/etc/nginx/conf.d/</code> 下配置 Nginx。关键在于准备两个 <code>server</code> 块。</p><p><strong>1. 博客配置（匹配域名）：</strong></p><p>Nginx</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name duziks.top;</span><br><span class="line">    root /var/www/hexo; </span><br><span class="line">    index index.html;</span><br><span class="line">    # ... 其他配置</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p><strong>2. OJ 配置（兜底 IP 访问）：</strong> 这里用到了 <code>default_server</code>，代表如果没匹配到域名，就全走这里。</p><p>Nginx</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80 default_server;</span><br><span class="line">    server_name _; </span><br><span class="line"></span><br><span class="line">    location / &#123;</span><br><span class="line">        proxy_pass http://127.0.0.1:8081; # 连接到 8081 的关键</span><br><span class="line">        proxy_set_header Host $host;</span><br><span class="line">        proxy_set_header X-Real-IP $remote_addr;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h4 id="第三步：重启与排错">第三步：重启与排错</h4><p>执行 <code>nginx -t</code> 检查语法，没问题后重启 Nginx。</p><p><strong>中间遇到的一个插曲：</strong> 刚改完访问 IP 出现了 <strong>502 Bad Gateway</strong>。 排查发现是 Docker 容器在重启过程中还没完全 Ready。等了一分钟，待 <code>docker ps</code> 状态稳定后，访问恢复正常。</p><hr><h3 id="4-总结">4. 总结</h3><p>通过这次折腾，搞清楚了几个关键点：</p><ul><li><strong>80 端口是唯一的</strong>，多个服务共存必须通过 Nginx 这种代理服务器做分发。</li><li><strong>127.0.0.1:8081</strong> 成了 Nginx 和 Docker 之间的“悄悄话”通道，不需要在云服务器防火墙开启 8081，这样反而更安全。</li><li>修改 <code>docker-compose</code> 之后，一定要确认容器状态是 <code>Up</code> 且端口映射正确。</li></ul><p>现在的服务器终于清爽了：一个 80 端口，承载了两个完全不同的世界。</p>]]></content>
+        <content type="html"><![CDATA[<h1>Nginx 博客配置 Let’s Encrypt SSL 证书及 DNS 踩坑记录</h1><p>前两天刚把服务器的 80 端口理顺，用 Nginx 做了反向代理，实现了“域名访问博客，IP 访问 OJ”的分流。但是发现我的网站只能用浏览器的无痕模式访问，查了一下大概是普通模式会自动使用https，但是由于没有配置SSL证书，所以无法访问。</p><p>去国内某云厂商的控制台看了一眼，好家伙，最基础的单域名 DV 证书现在居然卖到了 500 多块钱一年。果断关闭页面，拥抱开源世界最良心的方案：<strong>Let’s Encrypt 免费证书 + Certbot 自动化工具</strong>。</p><p>这里记录一下整个配置过程，以及中间遇到的一个非常经典的“网络灵异”大坑。</p><h3 id="1-极简安装与申请">1. 极简安装与申请</h3><p>因为我的服务器是 Ubuntu 系统，Web 服务器是 Nginx，所以直接用 <code>apt</code> 一键安装 Certbot 和它的 Nginx 插件：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt update</span><br><span class="line"><span class="built_in">sudo</span> apt install certbot python3-certbot-nginx -y</span><br></pre></td></tr></table></figure><p>安装完之后，理论上只需要执行下面这一行命令，Certbot 就会自动帮我验证域名、申请证书、甚至连 Nginx 的配置文件都帮我改好：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> certbot --nginx -d duziks.top</span><br></pre></td></tr></table></figure><p>本来以为敲下回车就能顺利喝茶了，结果现实狠狠打脸。</p><h3 id="2-踩坑：全世界都不认识我的域名？">2. 踩坑：全世界都不认识我的域名？</h3><p>终端直接甩给我一段无情的报错： <code>Detail: no valid A records found for duziks.top</code></p><p>大意是发证机构找不到我域名的 A 记录，验证失败。这就见鬼了，我明明在域名控制台配好了指向我服务器 IP 的解析，并且在自己本地的 Windows 电脑上 <code>ping duziks.top</code>，也能准确返回 <code>111.228.45.41</code>。</p><p><strong>为什么我本地能 Ping 通，Certbot 却说找不到？</strong></p><p>排查了一圈，破案了。原因出在 <strong>“全球 DNS 同步时间差（DNS Propagation）”</strong> 上。</p><p>Let’s Encrypt 的发证服务器主要在国外。我刚刚修改了域名解析，国内的宽带运营商同步速度非常快，立刻就认识了这个新 IP。但是跨越国际网络后，国外的 DNS 节点还没有收到这份“更新通知”，在它们眼里，我的域名依然是个空号。</p><h3 id="3-验证与解决">3. 验证与解决</h3><p>为了印证这个猜想，我打开了全球 DNS 检测工具 <a href="https://dnschecker.org/">dnschecker.org</a>，输入域名一查——果然，除了国内的几个节点，欧美地区的节点全部飘红 ❌。</p><p>既然路还没修通，疯狂重试也没用（甚至可能会触发 Let’s Encrypt 的防刷机制被关小黑屋）。</p><p><strong>唯一的解决方案就是：等。</strong></p><p>去喝了杯水，刷了会儿视频。大概等了半个多小时，再次去 dnschecker 上刷新，看到美国的几个关键节点终于变成了绿色的 ✅。</p><p>回到终端，再次执行：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> certbot --nginx -d duziks.top</span><br></pre></td></tr></table></figure><p>这一次畅通无阻！同意了协议，终端立刻弹出了绿色的 <code>Congratulations! You have successfully enabled HTTPS</code>。</p><h3 id="4-意外之喜：一劳永逸的续签">4. 意外之喜：一劳永逸的续签</h3><p>之前一直嫌弃免费证书只有 90 天有效期，每隔三个月就要手动弄一次很麻烦。</p><p>这次用 Certbot 发现，它在安装证书的同时，已经默默在 Ubuntu 系统的后台加了一个定时任务（可以通过 <code>systemctl list-timers | grep certbot</code> 查看）。以后每次快过期时，它会在后台自动帮我续签，完全不需要人工干预。</p><h3 id="总结">总结</h3><ol><li><strong>别买基础版付费证书</strong>：个人网站用 Let’s Encrypt 完全足够，底层加密算法和几百块钱的商业 DV 证书一模一样。</li><li><strong>警惕 DNS 缓存延迟</strong>：刚改完域名解析，如果申请证书报错，别急着改服务器配置。先用检测工具看看国外节点生效了没，让子弹飞一会儿。</li></ol>]]></content>
       
       
       
@@ -20,9 +20,42 @@
             
             <tag> Nginx </tag>
             
-            <tag> Docker </tag>
+            <tag> Blog </tag>
+            
+            <tag> DNS </tag>
+            
+            <tag> SSL </tag>
+            
+            <tag> 建站 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>Nginx 反向代理 Docker 实现域名与 IP 的访问分流</title>
+      <link href="/2026/03/31/Nginx-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86-Docker-%E5%AE%9E%E7%8E%B0%E5%9F%9F%E5%90%8D%E4%B8%8E-IP-%E7%9A%84%E8%AE%BF%E9%97%AE%E5%88%86%E6%B5%81/"/>
+      <url>/2026/03/31/Nginx-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86-Docker-%E5%AE%9E%E7%8E%B0%E5%9F%9F%E5%90%8D%E4%B8%8E-IP-%E7%9A%84%E8%AE%BF%E9%97%AE%E5%88%86%E6%B5%81/</url>
+      
+        <content type="html"><![CDATA[<h2 id="Nginx-反向代理-Docker-实现域名与-IP-的访问分流">Nginx 反向代理 Docker 实现域名与 IP 的访问分流</h2><h3 id="1-起因与冲突">1. 起因与冲突</h3><p>最近在服务器上部署了两个东西：一个是基于 <strong>Hexo</strong> 的个人博客，另一个是基于 <strong>Docker</strong> 部署的 <strong>HOJ（Hcode Online Judge）</strong>。</p><p>原本的想法很简单：</p><ul><li>输入域名 <code>duziks.top</code> 访问博客。</li><li>输入服务器 IP 访问 OJ 系统。</li></ul><p><strong>遇到的坑：</strong> 两个服务都默认想要占用 <strong>80 端口</strong>。Docker 容器（<code>hoj-frontend</code>）先占了坑，导致 Nginx 启动时直接报错，提示端口被占用。</p><hr><h3 id="2-解决思路：反向代理">2. 解决思路：反向代理</h3><p>核心思路是 <strong>“让出 80 端口，统一交给 Nginx 管理”</strong>。</p><ol><li>把 Docker 容器内部的 80 端口映射到宿主机的 <strong>8081</strong> 端口（避开公网默认的 80）。</li><li>让 Nginx 监听真正的 <strong>80</strong> 端口。</li><li>Nginx 内部做判断：如果是域名访问，直接读静态文件；如果是 IP 访问，就把流量“转发”给内部的 8081 端口。</li></ol><hr><h3 id="3-操作实录">3. 操作实录</h3><h4 id="第一步：修改-Docker-端口映射">第一步：修改 Docker 端口映射</h4><p>找到 HOJ 的安装目录（我的是在 <code>~/hoj-deploy/standAlone</code>），修改 <code>docker-compose.yml</code>。</p><p>将 <code>hoj-frontend</code> 的 <code>ports</code> 部分从 <code>&quot;80:80&quot;</code> 改为 <code>&quot;8081:80&quot;</code>。</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 重启容器使配置生效</span></span><br><span class="line">docker-compose up -d hoj-frontend</span><br></pre></td></tr></table></figure><p>检查一下：执行 <code>docker ps</code> 看到 <code>0.0.0.0:8081-&gt;80/tcp</code> 就算成功了。</p><h4 id="第二步：配置-Nginx-分流">第二步：配置 Nginx 分流</h4><p>在 <code>/etc/nginx/conf.d/</code> 下配置 Nginx。关键在于准备两个 <code>server</code> 块。</p><p><strong>1. 博客配置（匹配域名）：</strong></p><figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">    <span class="attribute">listen</span> <span class="number">80</span>;</span><br><span class="line">    <span class="attribute">server_name</span> duziks.top;</span><br><span class="line">    <span class="attribute">root</span> /var/www/hexo; </span><br><span class="line">    <span class="attribute">index</span> index.html;</span><br><span class="line">    <span class="comment"># ... 其他配置</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p><strong>2. OJ 配置（兜底 IP 访问）：</strong> 这里用到了 <code>default_server</code>，代表如果没匹配到域名，就全走这里。</p><figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">    <span class="attribute">listen</span> <span class="number">80</span> default_server;</span><br><span class="line">    <span class="attribute">server_name</span> _; </span><br><span class="line"></span><br><span class="line">    <span class="section">location</span> / &#123;</span><br><span class="line">        <span class="attribute">proxy_pass</span> http://127.0.0.1:8081; <span class="comment"># 连接到 8081 的关键</span></span><br><span class="line">        <span class="attribute">proxy_set_header</span> Host <span class="variable">$host</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> X-Real-IP <span class="variable">$remote_addr</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h4 id="第三步：重启与排错">第三步：重启与排错</h4><p>执行 <code>nginx -t</code> 检查语法，没问题后重启 Nginx。</p><p><strong>中间遇到的一个插曲：</strong> 刚改完访问 IP 出现了 <strong>502 Bad Gateway</strong>。 排查发现是 Docker 容器在重启过程中还没完全 Ready。等了一分钟，待 <code>docker ps</code> 状态稳定后，访问恢复正常。</p><hr><h3 id="4-总结">4. 总结</h3><p>通过这次折腾，搞清楚了几个关键点：</p><ul><li><strong>80 端口是唯一的</strong>，多个服务共存必须通过 Nginx 这种代理服务器做分发。</li><li><strong>127.0.0.1:8081</strong> 成了 Nginx 和 Docker 之间的“悄悄话”通道，不需要在云服务器防火墙开启 8081，这样反而更安全。</li><li>修改 <code>docker-compose</code> 之后，一定要确认容器状态是 <code>Up</code> 且端口映射正确。</li></ul><p>现在的服务器终于清爽了：一个 80 端口，承载了两个完全不同的世界。</p>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> 教程 </tag>
+            
+            <tag> linux </tag>
+            
+            <tag> Nginx </tag>
             
             <tag> Blog </tag>
+            
+            <tag> 建站 </tag>
+            
+            <tag> Docker </tag>
             
         </tags>
       
