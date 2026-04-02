@@ -8,7 +8,7 @@
       <link href="/2026/04/01/Nginx-%E5%8D%9A%E5%AE%A2%E9%85%8D%E7%BD%AE-Let-s-Encrypt-SSL-%E8%AF%81%E4%B9%A6%E5%8F%8A-DNS-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/"/>
       <url>/2026/04/01/Nginx-%E5%8D%9A%E5%AE%A2%E9%85%8D%E7%BD%AE-Let-s-Encrypt-SSL-%E8%AF%81%E4%B9%A6%E5%8F%8A-DNS-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/</url>
       
-        <content type="html"><![CDATA[<h1>Nginx 博客配置 Let’s Encrypt SSL 证书及 DNS 踩坑记录</h1><p>前两天刚把服务器的 80 端口理顺，用 Nginx 做了反向代理，实现了“域名访问博客，IP 访问 OJ”的分流。但是发现我的网站只能用浏览器的无痕模式访问，查了一下大概是普通模式会自动使用https，但是由于没有配置SSL证书，所以无法访问。</p><p>去国内某云厂商的控制台看了一眼，好家伙，最基础的单域名 DV 证书现在居然卖到了 500 多块钱一年。果断关闭页面，拥抱开源世界最良心的方案：<strong>Let’s Encrypt 免费证书 + Certbot 自动化工具</strong>。</p><p>这里记录一下整个配置过程，以及中间遇到的一个非常经典的“网络灵异”大坑。</p><h3 id="1-极简安装与申请">1. 极简安装与申请</h3><p>因为我的服务器是 Ubuntu 系统，Web 服务器是 Nginx，所以直接用 <code>apt</code> 一键安装 Certbot 和它的 Nginx 插件：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt update</span><br><span class="line"><span class="built_in">sudo</span> apt install certbot python3-certbot-nginx -y</span><br></pre></td></tr></table></figure><p>安装完之后，理论上只需要执行下面这一行命令，Certbot 就会自动帮我验证域名、申请证书、甚至连 Nginx 的配置文件都帮我改好：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> certbot --nginx -d duziks.top</span><br></pre></td></tr></table></figure><p>本来以为敲下回车就能顺利喝茶了，结果现实狠狠打脸。</p><h3 id="2-踩坑：全世界都不认识我的域名？">2. 踩坑：全世界都不认识我的域名？</h3><p>终端直接甩给我一段无情的报错： <code>Detail: no valid A records found for duziks.top</code></p><p>大意是发证机构找不到我域名的 A 记录，验证失败。这就见鬼了，我明明在域名控制台配好了指向我服务器 IP 的解析，并且在自己本地的 Windows 电脑上 <code>ping duziks.top</code>，也能准确返回 <code>111.228.45.41</code>。</p><p><strong>为什么我本地能 Ping 通，Certbot 却说找不到？</strong></p><p>排查了一圈，破案了。原因出在 <strong>“全球 DNS 同步时间差（DNS Propagation）”</strong> 上。</p><p>Let’s Encrypt 的发证服务器主要在国外。我刚刚修改了域名解析，国内的宽带运营商同步速度非常快，立刻就认识了这个新 IP。但是跨越国际网络后，国外的 DNS 节点还没有收到这份“更新通知”，在它们眼里，我的域名依然是个空号。</p><h3 id="3-验证与解决">3. 验证与解决</h3><p>为了印证这个猜想，我打开了全球 DNS 检测工具 <a href="https://dnschecker.org/">dnschecker.org</a>，输入域名一查——果然，除了国内的几个节点，欧美地区的节点全部飘红 ❌。</p><p>既然路还没修通，疯狂重试也没用（甚至可能会触发 Let’s Encrypt 的防刷机制被关小黑屋）。</p><p><strong>唯一的解决方案就是：等。</strong></p><p>去喝了杯水，刷了会儿视频。大概等了半个多小时，再次去 dnschecker 上刷新，看到美国的几个关键节点终于变成了绿色的 ✅。</p><p>回到终端，再次执行：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> certbot --nginx -d duziks.top</span><br></pre></td></tr></table></figure><p>这一次畅通无阻！同意了协议，终端立刻弹出了绿色的 <code>Congratulations! You have successfully enabled HTTPS</code>。</p><h3 id="4-意外之喜：一劳永逸的续签">4. 意外之喜：一劳永逸的续签</h3><p>之前一直嫌弃免费证书只有 90 天有效期，每隔三个月就要手动弄一次很麻烦。</p><p>这次用 Certbot 发现，它在安装证书的同时，已经默默在 Ubuntu 系统的后台加了一个定时任务（可以通过 <code>systemctl list-timers | grep certbot</code> 查看）。以后每次快过期时，它会在后台自动帮我续签，完全不需要人工干预。</p><h3 id="总结">总结</h3><ol><li><strong>别买基础版付费证书</strong>：个人网站用 Let’s Encrypt 完全足够，底层加密算法和几百块钱的商业 DV 证书一模一样。</li><li><strong>警惕 DNS 缓存延迟</strong>：刚改完域名解析，如果申请证书报错，别急着改服务器配置。先用检测工具看看国外节点生效了没，让子弹飞一会儿。</li></ol>]]></content>
+        <content type="html"><![CDATA[<h1>Nginx 博客配置 Let’s Encrypt SSL 证书及 DNS 踩坑记录</h1><p>前两天刚把服务器的 80 端口理顺，用 Nginx 做了反向代理，实现了“域名访问博客，IP 访问 OJ”的分流。但是发现我的网站只能用浏览器的无痕模式访问，查了一下大概是普通模式会自动使用https，但是由于没有配置SSL证书，所以无法访问。</p><p>去国内某云厂商的控制台看了一眼，好家伙，最基础的单域名 DV 证书现在居然卖到了 500 多块钱一年。果断关闭页面，拥抱开源世界最良心的方案：<strong>Let’s Encrypt 免费证书 + Certbot 自动化工具</strong>。</p><p>这里记录一下整个配置过程，以及中间遇到的一个非常经典的“网络灵异”大坑。</p><h3 id="1-极简安装与申请">1. 极简安装与申请</h3><p>因为我的服务器是 Ubuntu 系统，Web 服务器是 Nginx，所以直接用 <code>apt</code> 一键安装 Certbot 和它的 Nginx 插件：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt update</span><br><span class="line"><span class="built_in">sudo</span> apt install certbot python3-certbot-nginx -y</span><br></pre></td></tr></table></figure><p>安装完之后，理论上只需要执行下面这一行命令，Certbot 就会自动帮我验证域名、申请证书、甚至连 Nginx 的配置文件都帮我改好：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> certbot --nginx -d duziks.top</span><br></pre></td></tr></table></figure><p>本来以为敲下回车就能顺利喝茶了，结果现实狠狠打脸。</p><h3 id="2-踩坑：全世界都不认识我的域名？">2. 踩坑：全世界都不认识我的域名？</h3><p>终端直接甩给我一段无情的报错： <code>Detail: no valid A records found for duziks.top</code></p><p>大意是发证机构找不到我域名的 A 记录，验证失败。这就见鬼了，我明明在域名控制台配好了指向我服务器 IP 的解析，并且在自己本地的 Windows 电脑上 <code>ping duziks.top</code>，也能准确返回 <code>111.228.45.41</code>。</p><p><strong>为什么我本地能 Ping 通，Certbot 却说找不到？</strong></p><p>排查了一圈，破案了。原因出在 <strong>“全球 DNS 同步时间差（DNS Propagation）”</strong> 上。</p><p>Let’s Encrypt 的发证服务器主要在国外。我刚刚修改了域名解析，国内的宽带运营商同步速度非常快，立刻就认识了这个新 IP。但是跨越国际网络后，国外的 DNS 节点还没有收到这份“更新通知”，在它们眼里，我的域名依然是个空号。</p><h3 id="3-验证与解决">3. 验证与解决</h3><p>为了印证这个猜想，我打开了全球 DNS 检测工具 <a href="https://dnschecker.org/">dnschecker.org</a>，输入域名一查——果然，除了国内的几个节点，欧美地区的节点全部飘红 ❌。</p><p>既然路还没修通，疯狂重试也没用（甚至可能会触发 Let’s Encrypt 的防刷机制被关小黑屋）。</p><p><strong>唯一的解决方案就是：等。</strong></p><p>去喝了杯水，刷了会儿视频。大概等了半个多小时，再次去 dnschecker 上刷新，看到美国的几个关键节点终于变成了绿色的 ✅。</p><p>回到终端，再次执行：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> certbot --nginx -d duziks.top</span><br></pre></td></tr></table></figure><p>这一次畅通无阻！同意了协议，终端立刻弹出了绿色的 <code>Congratulations! You have successfully enabled HTTPS</code>。</p><h3 id="4-意外之喜：一劳永逸的续签">4. 意外之喜：一劳永逸的续签</h3><p>之前一直嫌弃免费证书只有 90 天有效期，每隔三个月就要手动弄一次很麻烦。</p><p>这次用 Certbot 发现，它在安装证书的同时，已经默默在 Ubuntu 系统的后台加了一个定时任务（可以通过 <code>systemctl list-timers | grep certbot</code> 查看）。以后每次快过期时，它会在后台自动帮我续签，完全不需要人工干预。</p><h3 id="5-Nginx-Gzip-压缩">5. Nginx Gzip 压缩</h3><p>如果没开 Gzip，HTML/CSS/JS 全是原样传输。开启后，文本类资源可以压缩掉 70% 的体积。</p><ul><li><p><strong>检查方法</strong>：在控制台输入 <code>sudo nano /etc/nginx/nginx.conf</code>。</p></li><li><p><strong>修改建议</strong>：找到 <code>gzip on;</code> 这一行，确保它和下面的参数没有被注释：</p><figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">gzip</span> <span class="literal">on</span>;</span><br><span class="line">   <span class="attribute">gzip_vary</span> <span class="literal">on</span>;        <span class="comment"># 告诉浏览器或 CDN 缓存，数据是经过压缩的</span></span><br><span class="line">   <span class="attribute">gzip_proxied</span> any;    <span class="comment"># 对所有经过代理的请求都开启压缩（对以后挂 CDN 至关重要）</span></span><br><span class="line">   <span class="attribute">gzip_comp_level</span> <span class="number">6</span>;   <span class="comment"># 压缩级别，1-9，6 是性价比最高的平衡点</span></span><br><span class="line">   <span class="attribute">gzip_buffers</span> <span class="number">16</span> <span class="number">8k</span>;</span><br><span class="line">   <span class="attribute">gzip_http_version</span> <span class="number">1</span>.<span class="number">1</span>;</span><br><span class="line">   <span class="comment"># 这一行最关键：让 Nginx 压缩除了 HTML 以外的常用文件类型</span></span><br><span class="line">   <span class="attribute">gzip_types</span> text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript image/svg+xml;</span><br></pre></td></tr></table></figure><p>修改完记得保存，然后执行以下命令重启 Nginx：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> nginx -t          <span class="comment"># 先检查语法有没有写错</span></span><br><span class="line"><span class="built_in">sudo</span> nginx -s reload   <span class="comment"># 重新加载配置</span></span><br></pre></td></tr></table></figure></li></ul><h3 id="总结">总结</h3><ol><li><strong>别买基础版付费证书</strong>：个人网站用 Let’s Encrypt 完全足够，底层加密算法和几百块钱的商业 DV 证书一模一样。</li><li><strong>警惕 DNS 缓存延迟</strong>：刚改完域名解析，如果申请证书报错，别急着改服务器配置。先用检测工具看看国外节点生效了没，让子弹飞一会儿。</li></ol>]]></content>
       
       
       
@@ -137,9 +137,9 @@
       
         <tags>
             
-            <tag> 语法 </tag>
-            
             <tag> java </tag>
+            
+            <tag> 语法 </tag>
             
         </tags>
       
@@ -255,9 +255,9 @@
       
         <tags>
             
-            <tag> C++ </tag>
-            
             <tag> 语法 </tag>
+            
+            <tag> C++ </tag>
             
         </tags>
       
@@ -297,9 +297,9 @@
       
         <tags>
             
-            <tag> C++ </tag>
-            
             <tag> 语法 </tag>
+            
+            <tag> C++ </tag>
             
         </tags>
       
