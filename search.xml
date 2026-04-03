@@ -4,6 +4,29 @@
   
     
     <entry>
+      <title>国内建站合规指南：ICP 备案与公安备案的区别及全流程解析</title>
+      <link href="/2026/04/03/%E5%9B%BD%E5%86%85%E5%BB%BA%E7%AB%99%E5%90%88%E8%A7%84%E6%8C%87%E5%8D%97%EF%BC%9AICP-%E5%A4%87%E6%A1%88%E4%B8%8E%E5%85%AC%E5%AE%89%E5%A4%87%E6%A1%88%E7%9A%84%E5%8C%BA%E5%88%AB%E5%8F%8A%E5%85%A8%E6%B5%81%E7%A8%8B%E8%A7%A3%E6%9E%90/"/>
+      <url>/2026/04/03/%E5%9B%BD%E5%86%85%E5%BB%BA%E7%AB%99%E5%90%88%E8%A7%84%E6%8C%87%E5%8D%97%EF%BC%9AICP-%E5%A4%87%E6%A1%88%E4%B8%8E%E5%85%AC%E5%AE%89%E5%A4%87%E6%A1%88%E7%9A%84%E5%8C%BA%E5%88%AB%E5%8F%8A%E5%85%A8%E6%B5%81%E7%A8%8B%E8%A7%A3%E6%9E%90/</url>
+      
+        <content type="html"><![CDATA[<h2 id="国内建站合规指南：ICP-备案与公安备案的区别及全流程解析">国内建站合规指南：ICP 备案与公安备案的区别及全流程解析</h2><p>在使用中国大陆地区的云服务器搭建个人网站（如 Hexo 博客、OJ 系统）时，合规是网站能够长久稳定运行的先决条件。根据国内相关法规，网站上线必须完成两项核心的行政审批与登记：<strong>工信部 ICP 备案</strong>和<strong>公安部联网备案</strong>。</p><p>本文将从技术与合规的角度，梳理这两种备案的核心区别、依赖关系以及标准的操作流程。</p><hr><h3 id="一、-核心概念与区别对比">一、 核心概念与区别对比</h3><p>许多开发者在初期容易将两者混淆。简而言之，ICP 备案决定了你的网站<strong>能否被访问</strong>（接入互联网的资格），而公安备案则是为了<strong>追溯与安全监管</strong>（辖区派出所登记）。</p><table><thead><tr><th style="text-align:left">维度</th><th style="text-align:left">ICP 备案 (工信部)</th><th style="text-align:left">公安联网备案 (公安部)</th></tr></thead><tbody><tr><td style="text-align:left"><strong>全称</strong></td><td style="text-align:left">非经营性互联网信息服务备案</td><td style="text-align:left">全国公安机关互联网站安全服务平台备案</td></tr><tr><td style="text-align:left"><strong>主管单位</strong></td><td style="text-align:left">工业和信息化部（及各地通信管理局）</td><td style="text-align:left">属地公安机关（网安大队）</td></tr><tr><td style="text-align:left"><strong>办理时机</strong></td><td style="text-align:left"><strong>网站上线前</strong>（未备案无法解析到大陆 80/443 端口）</td><td style="text-align:left"><strong>网站上线后</strong>的 30 日内</td></tr><tr><td style="text-align:left"><strong>前置条件</strong></td><td style="text-align:left">拥有已实名的域名、大陆节点云服务器</td><td style="text-align:left">已取得 ICP 备案号，且网站可正常访问</td></tr><tr><td style="text-align:left"><strong>办理入口</strong></td><td style="text-align:left">云服务器提供商的代备案系统（如阿里云、腾讯云控制台）</td><td style="text-align:left">全国公安机关互联网站安全管理服务平台（<a href="http://www.beian.gov.cn">www.beian.gov.cn</a>）</td></tr><tr><td style="text-align:left"><strong>网页标识</strong></td><td style="text-align:left">页脚悬挂 <code>京ICP备XXXXXXX号</code> 并链接至工信部</td><td style="text-align:left">页脚悬挂警徽图标及 <code>京公网安备XXXXXXX号</code></td></tr></tbody></table><hr><h3 id="二、-ICP-备案操作流程">二、 ICP 备案操作流程</h3><p>ICP 备案是整个合规流程的第一步。现代云服务商通常提供了完善的线上代备案系统，流程高度自动化。</p><h4 id="1-准备工作">1. 准备工作</h4><ul><li><strong>域名要求：</strong> 域名必须已完成实名认证，且实名信息（姓名、证件号）需与备案主体信息严格一致。域名实名认证完成后，通常需要等待 2-3 天同步至管局系统。</li><li><strong>服务器要求：</strong> 通常要求云服务器的剩余可用期限大于 3 个月，且包含公网 IP。</li></ul><h4 id="2-提交流程">2. 提交流程</h4><ol><li>登录云服务器提供商的控制台，进入“网站备案”模块。</li><li>填写主体信息（个人身份证件信息、通讯地址）。</li><li>填写网站信息（网站名称需规范，避免使用“博客”、“官网”等敏感词，建议使用“某某的学习笔记”等中性名称）。</li><li>通过服务商提供的小程序或 APP 进行人脸识别核验。</li><li>提交初审。服务商客服通常会在 1-2 个工作日内进行电话核实。</li></ol><h4 id="3-管局审核">3. 管局审核</h4><p>服务商初审通过后，信息将被提交至省通信管理局。在此期间，网站负责人会收到工信部的短信验证码，需在 24 小时内完成核验。管局审核法定周期为 20 个工作日，通常 1 周左右下发 ICP 备案号。</p><hr><h3 id="三、-公安联网备案操作流程">三、 公安联网备案操作流程</h3><p>在取得 ICP 备案号、配置好 Nginx 及域名解析，且网站能够通过公网正常访问后，即可启动公安备案流程。</p><h4 id="1-账号注册与主体录入">1. 账号注册与主体录入</h4><ol><li>访问“全国公安机关互联网站安全管理服务平台”并注册账号。</li><li>进入“开办主体管理”，录入个人信息并上传身份证正反面照片，等待审核（通常较快）。</li></ol><h4 id="2-填写网站基本信息">2. 填写网站基本信息</h4><p>在“新办网站申请”模块中，按要求填入各项技术与管理信息：</p><ul><li><strong>网站基本信息：</strong> 填入域名、网站名称及 ICP 备案号。</li><li><strong>网络接入服务商：</strong> 指为你提供云服务器的厂商。可通过查询提供商的组织机构代码填入，系统会自动检索。</li><li><strong>域名注册服务商：</strong> 指你购买域名的平台。同样通过公司名称或代码检索填入。</li><li><strong>相关前置许可：</strong> 对于个人技术博客、开源 OJ 系统等非经营性网站，<strong>必须选择“否”</strong>。勾选“是”需提供相关国家机关的纸质批文。</li></ul><h4 id="3-提交审核与悬挂标识">3. 提交审核与悬挂标识</h4><p>提交后，属地公安网安部门会进行人工审核。审核通过后，系统会分配一个公网安备号。开发者需要在系统内下载公安机关指定的 HTML 代码及警徽图标，将其嵌入至网站前端代码的 <code>&lt;footer&gt;</code> 标签中。</p><hr><h3 id="四、-常见技术与运维疑问解答">四、 常见技术与运维疑问解答</h3><p><strong>1. 域名解析变更会影响备案吗？</strong> 只要主域名未改变，服务器 IP 仍在原接入商（如保持在同一云厂商内更换实例），且网站性质未发生重大改变（如博客变商城），直接修改 DNS 解析（包括添加子域名、配置反向代理目录）无需重新备案。</p><p><strong>2. 跨服务商迁移服务器需要做什么？</strong> 若将服务器从服务商 A 迁移至服务商 B：</p><ul><li><strong>ICP 备案：</strong> 需要在服务商 B 处提交“接入备案”，否则服务商 B 的防火墙会拦截该域名的 80/443 端口流量。</li><li><strong>公安备案：</strong> 需要登录公安备案平台，在网站详情中修改“网络接入服务商”信息。</li></ul><p><strong>3. 配置 SSL 证书（HTTPS）对备案有要求吗？</strong> 申请 Let’s Encrypt 等 DV 证书本身基于 DNS 验证，不需要备案。但如果服务器在中国大陆，未备案的域名无法通过 443 端口提供 HTTPS 服务。因此，必须先完成 ICP 备案，再考虑开启 443 端口。</p>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> 教程 </tag>
+            
+            <tag> Blog </tag>
+            
+            <tag> 建站 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Nginx 博客配置 Let&#39;s Encrypt SSL 证书及 DNS 踩坑记录</title>
       <link href="/2026/04/01/Nginx-%E5%8D%9A%E5%AE%A2%E9%85%8D%E7%BD%AE-Let-s-Encrypt-SSL-%E8%AF%81%E4%B9%A6%E5%8F%8A-DNS-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/"/>
       <url>/2026/04/01/Nginx-%E5%8D%9A%E5%AE%A2%E9%85%8D%E7%BD%AE-Let-s-Encrypt-SSL-%E8%AF%81%E4%B9%A6%E5%8F%8A-DNS-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/</url>
