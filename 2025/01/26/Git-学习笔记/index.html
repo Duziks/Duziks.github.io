@@ -1,0 +1,388 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Git 学习笔记 | 你好！我是 Duziks (◍•ᴗ•◍)ﾉ♡</title><meta name="author" content="Duziks"><meta name="copyright" content="Duziks"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Git 学习笔记 一、版本控制系统简介   定义 ：版本控制系统用于跟踪和管理文件的修改历史，特别适合团队协作开发和代码管理。主要包括以下类型：  本地版本控制：仅在单机环境记录文件的历史。 集中式版本控制：如SVN，所有历史记录存储在中央服务器上。 分布式版本控制：如Git，每个用户都有完整的代码仓库副本，支持离线操作。    Git 的特点：速度快、分布式、支持分支操作、方便代码合并。   二">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Git 学习笔记">
+<meta property="og:url" content="https://duziks.github.io/2025/01/26/Git-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="你好！我是 Duziks (◍•ᴗ•◍)ﾉ♡">
+<meta property="og:description" content="Git 学习笔记 一、版本控制系统简介   定义 ：版本控制系统用于跟踪和管理文件的修改历史，特别适合团队协作开发和代码管理。主要包括以下类型：  本地版本控制：仅在单机环境记录文件的历史。 集中式版本控制：如SVN，所有历史记录存储在中央服务器上。 分布式版本控制：如Git，每个用户都有完整的代码仓库副本，支持离线操作。    Git 的特点：速度快、分布式、支持分支操作、方便代码合并。   二">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://fastly.jsdelivr.net/gh/Duziks/Image-Bed/img/20260420140235429.png">
+<meta property="article:published_time" content="2025-01-26T05:59:25.000Z">
+<meta property="article:modified_time" content="2026-04-20T06:03:29.601Z">
+<meta property="article:author" content="Duziks">
+<meta property="article:tag" content="Git">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fastly.jsdelivr.net/gh/Duziks/Image-Bed/img/20260420140235429.png"><link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/Duziks/Image-Bed/lenovo/piggfixed.png"><link rel="canonical" href="https://duziks.github.io/2025/01/26/Git-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        if (name && globalFn[key][name]) return
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Git 学习笔记',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-04-20 14:03:29'
+}</script><meta name="referrer" content="no-referrer" /><meta name="generator" content="Hexo 7.3.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+  window.addEventListener('load', preloader.endLoading)
+
+  if (false) {
+    btf.addGlobalFn('pjaxSend', preloader.initLoading, 'preloader_init')
+    btf.addGlobalFn('pjaxComplete', preloader.endLoading, 'preloader_end')
+  }
+})()</script><div id="web_bg" style="background-image: url(/images/HITWH2.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://cdn.luogu.com.cn/upload/usericon/228287.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">21</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">17</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/movies/"><i class="fa-fw fa-solid fa-clapperboard"></i><span> 电影</span></a></li><li><a class="site-page child" href="/books/"><i class="fa-fw fa-solid fa-book"></i><span> 书单</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://cdn.jsdelivr.net/gh/Duziks/Image-Bed/img/wallhaven-lyz3d2.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="https://cdn.jsdelivr.net/gh/Duziks/Image-Bed/lenovo/piggfixed.png" alt="Logo"><span class="site-name">你好！我是 Duziks (◍•ᴗ•◍)ﾉ♡</span></a><a class="nav-page-title" href="/"><span class="site-name">Git 学习笔记</span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/movies/"><i class="fa-fw fa-solid fa-clapperboard"></i><span> 电影</span></a></li><li><a class="site-page child" href="/books/"><i class="fa-fw fa-solid fa-book"></i><span> 书单</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Git 学习笔记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-01-26T05:59:25.000Z" title="发表于 2025-01-26 13:59:25">2025-01-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-04-20T06:03:29.601Z" title="更新于 2026-04-20 14:03:29">2026-04-20</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1>Git 学习笔记</h1>
+<h2 id="一、版本控制系统简介">一、版本控制系统简介</h2>
+<ul>
+<li>
+<p>定义</p>
+<p>：版本控制系统用于跟踪和管理文件的修改历史，特别适合团队协作开发和代码管理。主要包括以下类型：</p>
+<ul>
+<li><strong>本地版本控制</strong>：仅在单机环境记录文件的历史。</li>
+<li><strong>集中式版本控制</strong>：如SVN，所有历史记录存储在中央服务器上。</li>
+<li><strong>分布式版本控制</strong>：如Git，每个用户都有完整的代码仓库副本，支持离线操作。</li>
+</ul>
+</li>
+<li>
+<p><strong>Git 的特点</strong>：速度快、分布式、支持分支操作、方便代码合并。</p>
+</li>
+</ul>
+<h2 id="二、安装与基本配置">二、安装与基本配置</h2>
+<ul>
+<li>安装 Git
+<ul>
+<li>从 <a target="_blank" rel="noopener" href="https://git-scm.com/">Git 官网</a> 下载并安装适合的版本。</li>
+<li>安装完成后，在终端执行<code>git --version</code>确认安装成功。</li>
+</ul>
+</li>
+<li>基本配置
+<ul>
+<li>配置用户名：<code>git config --global user.name &quot;Your Name&quot;</code></li>
+<li>配置邮箱：<code>git config --global user.email &quot;your_email@example.com&quot;</code></li>
+<li>查看配置：<code>git config --list</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="三、仓库初始化与管理">三、仓库初始化与管理</h2>
+<ul>
+<li>初始化本地仓库
+<ul>
+<li>进入项目目录，执行<code>git init</code>。</li>
+<li>初始化后，会生成一个<code>.git</code>目录，用于存储版本控制信息。</li>
+</ul>
+</li>
+<li>克隆远程仓库
+<ul>
+<li>使用<code>git clone [repository_url]</code>将远程仓库完整复制到本地。</li>
+<li>包含所有历史记录和分支信息。</li>
+</ul>
+</li>
+</ul>
+<h2 id="四、文件跟踪与提交">四、文件跟踪与提交</h2>
+<ul>
+<li>查看状态
+<ul>
+<li>使用<code>git status</code>查看当前文件的状态，了解哪些文件被修改或未被跟踪。</li>
+</ul>
+</li>
+<li>添加文件到暂存区
+<ul>
+<li>单个文件：<code>git add [file]</code></li>
+<li>当前目录所有文件：<code>git add .</code></li>
+</ul>
+</li>
+<li>提交到本地仓库
+<ul>
+<li><code>git commit -m &quot;commit message&quot;</code>提交暂存区的更改到仓库。</li>
+</ul>
+</li>
+<li>查看提交历史
+<ul>
+<li>简单查看：<code>git log</code></li>
+<li>单行显示：<code>git log --oneline</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="五、分支与合并">五、分支与合并</h2>
+<ul>
+<li>分支操作
+<ul>
+<li>创建新分支：<code>git branch [branch-name]</code></li>
+<li>切换分支：<code>git checkout [branch-name]</code></li>
+<li>创建并切换：<code>git checkout -b [branch-name]</code></li>
+</ul>
+</li>
+<li>合并分支
+<ul>
+<li>在目标分支执行<code>git merge [branch-name]</code>将指定分支合并。</li>
+<li>合并冲突需手动解决，解决后执行<code>git add .</code>并提交。</li>
+</ul>
+</li>
+<li>删除分支
+<ul>
+<li>已合并分支：<code>git branch -d [branch-name]</code></li>
+<li>强制删除：<code>git branch -D [branch-name]</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="六、远程仓库操作">六、远程仓库操作</h2>
+<ul>
+<li>关联远程仓库
+<ul>
+<li><code>git remote add origin [url]</code>将本地仓库与远程仓库关联。</li>
+</ul>
+</li>
+<li>推送更改
+<ul>
+<li>首次推送：<code>git push -u origin [branch-name]</code></li>
+<li>之后推送：<code>git push</code></li>
+</ul>
+</li>
+<li>拉取更新
+<ul>
+<li><code>git pull</code>从远程仓库获取最新版本并尝试合并到当前分支。</li>
+</ul>
+</li>
+</ul>
+<h2 id="七、标签管理">七、标签管理</h2>
+<ul>
+<li>创建标签
+<ul>
+<li>简单标签：<code>git tag [tag-name]</code></li>
+<li>带说明标签：<code>git tag -a [tag-name] -m &quot;message&quot;</code></li>
+</ul>
+</li>
+<li>查看标签
+<ul>
+<li>列出标签：<code>git tag</code></li>
+</ul>
+</li>
+<li>推送标签
+<ul>
+<li>单个标签：<code>git push origin [tag-name]</code></li>
+<li>所有标签：<code>git push origin --tags</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="八、撤销与恢复">八、撤销与恢复</h2>
+<ul>
+<li>撤销修改
+<ul>
+<li>丢弃工作区更改：<code>git checkout -- [file]</code></li>
+<li>清除整个工作区更改：<code>git checkout -- .</code></li>
+</ul>
+</li>
+<li>撤销暂存
+<ul>
+<li>将暂存区更改退回工作区：<code>git reset HEAD [file]</code></li>
+</ul>
+</li>
+<li>回退版本
+<ul>
+<li>强制回退：<code>git reset --hard [commit-id]</code>，丢失后续提交。</li>
+</ul>
+</li>
+</ul>
+<h2 id="九、查看差异">九、查看差异</h2>
+<ul>
+<li>文件差异
+<ul>
+<li>工作区与暂存区：<code>git diff</code></li>
+<li>暂存区与仓库：<code>git diff --cached</code></li>
+<li>工作区与仓库：<code>git diff HEAD</code></li>
+</ul>
+</li>
+<li>分支差异
+<ul>
+<li><code>git diff [branch1] [branch2]</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="十、实用技巧">十、实用技巧</h2>
+<ul>
+<li>暂存部分修改
+<ul>
+<li><code>git add -p</code>交互式选择部分修改。</li>
+</ul>
+</li>
+<li>忽略文件
+<ul>
+<li>创建<code>.gitignore</code>文件，添加不需要跟踪的文件或目录。</li>
+<li>检查生效：<code>git status</code>中显示忽略文件状态。</li>
+</ul>
+</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://duziks.github.io">Duziks</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://duziks.github.io/2025/01/26/Git-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">https://duziks.github.io/2025/01/26/Git-学习笔记/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://duziks.github.io" target="_blank">你好！我是 Duziks (◍•ᴗ•◍)ﾉ♡</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Git/">Git</a></div><div class="post-share"><div class="social-share" data-image="https://fastly.jsdelivr.net/gh/Duziks/Image-Bed/img/20260420140235429.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i>赞助</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/images/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="/images/wechat.jpg" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li></ul></div></div><nav class="pagination-post" id="pagination"><a class="prev-post pull-left" href="/2025/03/29/QQ%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%BA%E5%99%A8%E4%BA%BA/" title="QQ大模型机器人"><img class="cover" src="/images/robot_dog.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">QQ大模型机器人</div></div></a><a class="next-post pull-right" href="/2025/01/22/linux%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/" title="linux文件管理系统"><img class="cover" src="/images/teamwork.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">linux文件管理系统</div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info is-center"><div class="avatar-img"><img src="https://cdn.luogu.com.cn/upload/usericon/228287.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Duziks</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">21</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">17</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Duziks"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Duziks" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:3078802823@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #24292e;"></i></a><a class="social-icon" href="https://codeforces.com/profile/Duziks" target="_blank" title="Codeforces"><i class="fa-solid fa-code" style="color: #24292e;"></i></a><a class="social-icon" href="https://space.bilibili.com/504795145" target="_blank" title="Bilibili"><i class="fa-brands fa-bilibili" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">博客持续完善中······</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">Git 学习笔记</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E7%AE%80%E4%BB%8B"><span class="toc-number">1.1.</span> <span class="toc-text">一、版本控制系统简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%AE%89%E8%A3%85%E4%B8%8E%E5%9F%BA%E6%9C%AC%E9%85%8D%E7%BD%AE"><span class="toc-number">1.2.</span> <span class="toc-text">二、安装与基本配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E4%BB%93%E5%BA%93%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%8E%E7%AE%A1%E7%90%86"><span class="toc-number">1.3.</span> <span class="toc-text">三、仓库初始化与管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%96%87%E4%BB%B6%E8%B7%9F%E8%B8%AA%E4%B8%8E%E6%8F%90%E4%BA%A4"><span class="toc-number">1.4.</span> <span class="toc-text">四、文件跟踪与提交</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E5%88%86%E6%94%AF%E4%B8%8E%E5%90%88%E5%B9%B6"><span class="toc-number">1.5.</span> <span class="toc-text">五、分支与合并</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E6%93%8D%E4%BD%9C"><span class="toc-number">1.6.</span> <span class="toc-text">六、远程仓库操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E6%A0%87%E7%AD%BE%E7%AE%A1%E7%90%86"><span class="toc-number">1.7.</span> <span class="toc-text">七、标签管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E6%92%A4%E9%94%80%E4%B8%8E%E6%81%A2%E5%A4%8D"><span class="toc-number">1.8.</span> <span class="toc-text">八、撤销与恢复</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E6%9F%A5%E7%9C%8B%E5%B7%AE%E5%BC%82"><span class="toc-number">1.9.</span> <span class="toc-text">九、查看差异</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E3%80%81%E5%AE%9E%E7%94%A8%E6%8A%80%E5%B7%A7"><span class="toc-number">1.10.</span> <span class="toc-text">十、实用技巧</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/04/03/%E5%9B%BD%E5%86%85%E5%BB%BA%E7%AB%99%E5%90%88%E8%A7%84%E6%8C%87%E5%8D%97%EF%BC%9AICP-%E5%A4%87%E6%A1%88%E4%B8%8E%E5%85%AC%E5%AE%89%E5%A4%87%E6%A1%88%E7%9A%84%E5%8C%BA%E5%88%AB%E5%8F%8A%E5%85%A8%E6%B5%81%E7%A8%8B%E8%A7%A3%E6%9E%90/" title="国内建站合规指南：ICP 备案与公安备案的区别及全流程解析"><img src="https://fastly.jsdelivr.net/gh/Duziks/Image-Bed/img/beiancover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="国内建站合规指南：ICP 备案与公安备案的区别及全流程解析"/></a><div class="content"><a class="title" href="/2026/04/03/%E5%9B%BD%E5%86%85%E5%BB%BA%E7%AB%99%E5%90%88%E8%A7%84%E6%8C%87%E5%8D%97%EF%BC%9AICP-%E5%A4%87%E6%A1%88%E4%B8%8E%E5%85%AC%E5%AE%89%E5%A4%87%E6%A1%88%E7%9A%84%E5%8C%BA%E5%88%AB%E5%8F%8A%E5%85%A8%E6%B5%81%E7%A8%8B%E8%A7%A3%E6%9E%90/" title="国内建站合规指南：ICP 备案与公安备案的区别及全流程解析">国内建站合规指南：ICP 备案与公安备案的区别及全流程解析</a><time datetime="2026-04-03T11:17:04.000Z" title="发表于 2026-04-03 19:17:04">2026-04-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/04/01/Nginx-%E5%8D%9A%E5%AE%A2%E9%85%8D%E7%BD%AE-Let-s-Encrypt-SSL-%E8%AF%81%E4%B9%A6%E5%8F%8A-DNS-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" title="Nginx 博客配置 Let's Encrypt SSL 证书及 DNS 踩坑记录"><img src="https://cdn.jsdelivr.net/gh/Duziks/Image-Bed/img/https.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx 博客配置 Let's Encrypt SSL 证书及 DNS 踩坑记录"/></a><div class="content"><a class="title" href="/2026/04/01/Nginx-%E5%8D%9A%E5%AE%A2%E9%85%8D%E7%BD%AE-Let-s-Encrypt-SSL-%E8%AF%81%E4%B9%A6%E5%8F%8A-DNS-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" title="Nginx 博客配置 Let's Encrypt SSL 证书及 DNS 踩坑记录">Nginx 博客配置 Let's Encrypt SSL 证书及 DNS 踩坑记录</a><time datetime="2026-04-01T06:46:31.000Z" title="发表于 2026-04-01 14:46:31">2026-04-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/03/31/Nginx-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86-Docker-%E5%AE%9E%E7%8E%B0%E5%9F%9F%E5%90%8D%E4%B8%8E-IP-%E7%9A%84%E8%AE%BF%E9%97%AE%E5%88%86%E6%B5%81/" title="Nginx 反向代理 Docker 实现域名与 IP 的访问分流"><img src="https://cdn.jsdelivr.net/gh/Duziks/Image-Bed/lenovo/nginx2dockergemini.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx 反向代理 Docker 实现域名与 IP 的访问分流"/></a><div class="content"><a class="title" href="/2026/03/31/Nginx-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86-Docker-%E5%AE%9E%E7%8E%B0%E5%9F%9F%E5%90%8D%E4%B8%8E-IP-%E7%9A%84%E8%AE%BF%E9%97%AE%E5%88%86%E6%B5%81/" title="Nginx 反向代理 Docker 实现域名与 IP 的访问分流">Nginx 反向代理 Docker 实现域名与 IP 的访问分流</a><time datetime="2026-03-31T09:37:19.000Z" title="发表于 2026-03-31 17:37:19">2026-03-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/02/25/hexo%E5%8D%9A%E5%AE%A2%E9%83%A8%E7%BD%B2%E5%88%B0linux%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%95%99%E7%A8%8B/" title="hexo博客部署到linux云服务器教程"><img src="https://cdn.jsdelivr.net/gh/Duziks/Image-Bed/img/20260225234755386.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="hexo博客部署到linux云服务器教程"/></a><div class="content"><a class="title" href="/2026/02/25/hexo%E5%8D%9A%E5%AE%A2%E9%83%A8%E7%BD%B2%E5%88%B0linux%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%95%99%E7%A8%8B/" title="hexo博客部署到linux云服务器教程">hexo博客部署到linux云服务器教程</a><time datetime="2026-02-25T15:45:13.000Z" title="发表于 2026-02-25 23:45:13">2026-02-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/02/24/%E3%80%90%E7%89%88%E6%9C%AC%E7%AD%94%E6%A1%88%E3%80%91PicGo-Github-%E5%88%9B%E5%BB%BA%E5%9B%BE%E5%BA%8A/" title="【版本答案】PicGo + Github 创建图床"><img src="https://cdn.jsdelivr.net/gh/Duziks/Image-Bed/img/wallhaven-96jo2k.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="【版本答案】PicGo + Github 创建图床"/></a><div class="content"><a class="title" href="/2026/02/24/%E3%80%90%E7%89%88%E6%9C%AC%E7%AD%94%E6%A1%88%E3%80%91PicGo-Github-%E5%88%9B%E5%BB%BA%E5%9B%BE%E5%BA%8A/" title="【版本答案】PicGo + Github 创建图床">【版本答案】PicGo + Github 创建图床</a><time datetime="2026-02-24T14:02:52.000Z" title="发表于 2026-02-24 22:02:52">2026-02-24</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(https://cdn.jsdelivr.net/gh/Duziks/Image-Bed/img/wallhaven-lyz3d2.png);"><div id="footer-wrap"><div class="copyright">&copy;2024 - 2026 By Duziks</div><div class="footer_custom_text"><div class="footer-badges" style="margin-top: 10px;">
+  <a href="https://hexo.io/" target="_blank" rel="noopener" style="margin-right: 5px;">
+    <img src="https://img.shields.io/badge/Frame-Hexo-blue?style=flat-square&logo=hexo" alt="Hexo">
+  </a>
+  <a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank" rel="noopener" style="margin-right: 5px;">
+    <img src="https://img.shields.io/badge/Theme-Butterfly-ff69b4?style=flat-square&logo=gitbook" alt="Butterfly">
+  </a>
+  <a href="https://github.com/" target="_blank" rel="noopener">
+    <img src="https://img.shields.io/badge/Deployment-GitHub-181717?style=flat-square&logo=github" alt="GitHub">
+  </a>
+</div>
+
+<div style="margin-top: 8px; font-size: 13px; display: flex; justify-content: center; align-items: center; gap: 15px;">
+  <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">
+    鲁ICP备2026014531号
+  </a>
+  <a href="https://beian.mps.gov.cn/" target="_blank" rel="noopener" style="color: inherit; text-decoration: none; display: flex; align-items: center;">
+    <img src="/images/jinghui.png" style="width: 16px; height: 16px; margin-right: 4px;" alt="公安备案图标">
+    鲁公网安备37100002001518号
+  </a>
+</div>
+</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css')
+    if (false) {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/katex/dist/contrib/copy-tex.min.js')
+    }
+  }
+
+  showKatex()
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div></body></html>
